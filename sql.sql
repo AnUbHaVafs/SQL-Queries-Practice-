@@ -1,3 +1,172 @@
+-- TRIGGER -- SS
+-- this is a block of code which will executed when a particular operation
+-- is performed on the database or table . this block of code gets tirggered when 
+-- particular action gets performed on table/database.
+
+-- look at below 2 queries : one with 
+-- ON DELETE SET NULL --> see below
+-- ON DELETE CASCADE --> see below
+
+CREATE TABLE client (
+  client_id INT PRIMARY KEY,
+  client_name VARCHAR(40),
+  branch_id INT,
+  FOREIGN KEY(branch_id) REFERENCES branch(branch_id) ON DELETE SET NULL --> if branch.branch_id 102 gets deleted then client.branch_id corresponds to 102 gets NULL but in case of cascade it will get removed (row will gets removed!)
+);
+
+CREATE TABLE works_with (
+  emp_id INT,
+  client_id INT,
+  total_sales INT,
+  PRIMARY KEY(emp_id, client_id),
+  FOREIGN KEY(emp_id) REFERENCES employee(emp_id) ON DELETE CASCADE,
+  FOREIGN KEY(client_id) REFERENCES client(client_id) ON DELETE CASCADE
+);
+
+-- find all clients who are handles by the branch that michael scott manages
+--  assume you know michael's ID
+SELECT client.client_name 
+FROM client 
+WHERE client.branch_id = (
+    SELECT branch.branch_id
+    FROM branch
+    WHERE mgr_id = 102
+    LIMIT 1
+);
+
+-- //find names of employeees who have sold over 30000 to a single client 
+SELECT first_name, last_name
+FROM employee
+WHERE emp_id IN (
+   SELECT emp_id 
+   FROM works_with 
+   WHERE total_sales > 30000
+);
+
+
+ SELECT employee.emp_id, employee.first_name, branch.branch_name
+ FROM employee
+ RIGHT JOIN branch --> include all the branches even the some branches foesn't have the mgr_id 
+ ON employee.emp_id=branch.mgr_id;
+
+ SELECT employee.emp_id, employee.first_name, branch.branch_name
+ FROM employee
+ LEFT JOIN branch --it will include all the rows of the letf table from eployee because the employee table is int the left even though the branch for them is null
+ ON employee.emp_id=branch.mgr_id;
+
+-- Join : used to comibie the rows based on the columns we get , 
+--  SELECT employee.emp_id, employee.first_name, branch.branch_name
+--  FROM employee
+--  JOIN branch
+--  ON employee.emp_id=branch.mgr_id;
+
+-- SELECT salary 
+-- FROM employee
+-- UNION 
+-- SELECT total_sales 
+-- FROM works_with;
+
+SELECT client_name , client.branch_id
+FROM client
+UNION
+SELECT supplier_name, branch_supplier.branch_id
+FROM branch_supplier;
+
+-- below is equal to the above
+
+-- SELECT client_name , branch_id
+-- FROM client
+-- UNION
+-- SELECT supplier_name, branch_id
+-- FROM branch_supplier;
+
+SELECT first_name AS Company_Names
+FROM employee
+UNION
+SELECT branch_name
+FROM branch
+UNION 
+SELECT client_name
+FROM client;
+
+-- // UNION  
+-- conditions :
+-- both must have equal number of columns AND same data type 
+
+-- SELECT first_name
+-- FROM employee
+-- UNION
+-- SELECT branch_name
+-- FROM branch;
+
+-- -- fidn any client swho are in school
+-- SELECT *
+-- FROM client 
+-- WHERE client_name LIKE '%school%';
+-- SELECT *
+-- FROM client;
+
+-- -- Find any employee born in october 
+-- SELECT *
+-- FROM employee
+-- WHERE birth_day LIKE '____-10%';
+
+-- -- find any branch suppliers who are in label bussiness
+-- SELECT *
+-- FROM branch_supplier 
+-- WHERE supplier_name LIKE '% Label%';
+
+-- -- Wildcards
+-- -- used to filter out the data using some patterns 
+-- -- % = any no. of characters, _ = one character
+-- SELECT *
+-- FROM client 
+-- WHERE client_name LIKE '%LLC'; --before LLC any number of characters can come 
+
+-- -- find the total sales of each salesman 
+-- SELECT SUM(total_sales), client_id
+-- FROM works_with
+-- GROUP BY client_id;
+
+-- find the total number of male and female employees
+-- SELECT COUNT(sex), sex
+-- FROM employee
+-- GROUP BY sex;
+
+-- -- // find the average of all employees salaries
+-- SELECT AVG(salary)
+-- FROM employee;
+
+-- SELECT AVG(salary)
+-- FROM employee
+-- WHERE sex='M';
+
+-- SELECT SUM(salary)
+-- FROM employee;
+
+-- -- //finding number of female employees born after 1970
+-- SELECT COUNT(emp_id)
+-- FROM employee
+-- WHERE sex='F' AND birth_day > '1971-01-01';
+
+-- SELECT *
+-- FROM employee;
+
+-- SELECT COUNT(super_id)
+-- FROM employee;
+
+-- SELECT COUNT(emp_id)
+-- FROM employee;
+
+-- SELECT DISTINCT branch_id
+-- FROM employee;
+
+-- SELECT DISTINCT branch_id
+-- FROM employee;
+
+-- SELECT DISTINCT sex
+-- FROM employee;
+
 -- it will change the colum heading to forename and surname
 SELECT first_name AS forename, last_name AS surname 
 FROM employee;
